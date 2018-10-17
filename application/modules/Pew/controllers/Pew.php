@@ -25,11 +25,17 @@ class Pew extends MX_Controller
         $this->load->library('form_validation');
         $this->load->database();
         $this->load->model('pew/logindb');
+        $this->load->helper('url');
     }
 
     public function index()
     {
         $this->load->view('index.php');
+    }
+
+    public function page1()
+    {
+        $this->load->view('page1.php');
     }
 
     public function show()
@@ -41,30 +47,67 @@ class Pew extends MX_Controller
         $params = array_merge($post, $get);
 
         if($post){
-            $data = array(
-                'name' => $params['uname'],
-                'pass' => $params['pname'],
-            );
-        
-        $result = $this->logindb->login($data);
-        if($result){
+                $data = array(
+                    'name' => $params['uname'],
+                    'pass' => $params['pname'],
+                );
 
-            $allid['data']=$this->logindb->displayrecords();
-	
-            $this->load->view('show', $allid);
-        }else{
 
-            $this->form_validation->set_rules('uname', 'Username', 'required|min_length[5]|max_length[15]|trim');
-            $this->form_validation->set_rules('pname', 'Password', 'required|min_length[5]|max_length[15]|trim');
-            
-            if($this->form_validation->run() == FALSE){
-                $this->load->view('index.php');
-            }else{
-                $this->load->view('index.php');
+                $this->form_validation->set_rules('uname', 'Username', 'required|min_length[5]|max_length[15]|trim');
+                $this->form_validation->set_rules('pname', 'Password', 'required|min_length[5]|max_length[15]|trim');
+                
+                if($this->form_validation->run() == FALSE){
+
+                    $this->load->view('index');
+
+                }else{
+
+                    $userexist = $this->logindb->checkuser($data);
+                    $passexist = $this->logindb->checkpass($data);
+
+
+                    if(!empty($userexist) && !empty($passexist)){
+                        $allid['data']=$this->logindb->displayrecords();
+                        
+                        $this->load->view('show', $allid);
+                    }else{
+                        
+                        $this->session->set_flashdata("err","Username and Password not found ");
+                        $this->load->view('index');
+                    }
+                    
+                }
             }
+        
         }
-        }
-    }
+
+    // public function username_check($str)
+    // {
+    //     $temp = $this->logindb->checkuser($str);
+    //     if ($temp)
+    //     {
+    //             $this->form_validation->set_message('username_check', 'username {field} already use');
+    //             return FALSE;
+    //     }
+    //     else
+    //     {
+    //             return TRUE;
+    //     }
+    // }
+
+    // public function password_check($str)
+    // {
+    //     $temp = $this->logindb->checkpass($str);
+    //     if ($temp)
+    //     {
+    //             $this->form_validation->set_message('username_check', 'password {field} already use"');
+    //             return FALSE;
+    //     }
+    //     else
+    //     {
+    //             return TRUE;
+    //     }
+    // }
 
     public function registration(){
         $this->load->view('registration');
@@ -84,12 +127,34 @@ class Pew extends MX_Controller
                 'email' => $params['email']
             );
 
-            $result = $this->logindb->saverecords($data['name'],$data['pass'],$data['email']);
-            if($result == TRUE){
+
+            $this->form_validation->set_rules('uname', 'Username', 'required|min_length[5]|max_length[15]|trim');
+            $this->form_validation->set_rules('pname', 'Password', 'required|min_length[5]|max_length[15]|trim');
+                
+            if($this->form_validation->run() == FALSE){
+
                 $this->load->view('registration');
+
             }else{
-                $this->load->view('index.php');
+
+                $userexist = $this->logindb->checkuser($data);
+                $passexist = $this->logindb->checkpass($data);
+
+
+                if(!empty($userexist) && !empty($passexist)){
+
+                    $this->session->set_flashdata("err","Username and Password Exist ");
+                    $this->load->view('registration');
+                    
+                }else{
+                    $result = $this->logindb->saverecords($data['name'],$data['pass'],$data['email']);
+                    $this->load->view('index');
+                }
+                
             }
+
+
+            
         }
     }
 

@@ -12,6 +12,28 @@ class logindb extends CI_Model
 	    $query=$this->db->query("select * from user_login");
 	    return $query->result();
     }
+
+    public function checkuser($data){
+        $condition = "user_name =" . "'" . $data['name'] . "'";
+        $this->db->select('*');
+        $this->db->from('user_login');
+        $this->db->where($condition);
+        $query = $this->db->get();
+        
+        $result = $query->result_array();
+        return $result;
+    }
+
+    public function checkpass($data){
+        $condition = "user_password =" . "'" . $data['pass'] . "'";
+        $this->db->select('*');
+        $this->db->from('user_login');
+        $this->db->where($condition);
+        $query = $this->db->get();
+        
+        $result = $query->result_array();
+        return $result;
+    }
     
     public function login($data) {
 
